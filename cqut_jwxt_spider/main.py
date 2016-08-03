@@ -26,9 +26,11 @@ class CQUT():
         __VIEWSTATE = soup.find('input', attrs={'name': '__VIEWSTATE'}).attrs['value']
         checkCode_url = re.sub(r'default2.aspx', self.checkCodeUrl, redirect_url)  # 验证码图片地址
 
-        print '模拟登录教务系统,然后嘿嘿!(比如获取四六级成绩)  →_→ '
-        userName = raw_input("请输入学号:")
-        password = raw_input("请输入密码:")
+        # print '模拟登录教务系统,然后嘿嘿!(比如获取四六级成绩)  →_→ '
+        # userName = raw_input("请输入学号:")
+        # password = raw_input("请输入密码:")
+        userName = '11403080238';
+        password = 'ccc123..';
 
         checkCode = self.getCheckCode(checkCode_url)  # 得到验证码数字
 
@@ -55,21 +57,58 @@ class CQUT():
 
         content = self.getPage(redirect_url, postdata, headers)
         page2 = content[0]
+        soup2 = content[1]
 
         main_url = page2.geturl()  # 登录成功后教务系统主页url
 
-        djkscx_url = re.sub(r'xs_main', 'xsdjkscx', main_url) + '&xm=陈钰博&gnmkdm=N121605'  # 查询四六级成绩url
+        xscjcx_url = re.sub(r'xs_main', 'xscjcx', main_url) + '&xm=陈钰博&gnmkdm=N121604'  # 查询四六级成绩url
 
         headers2 = {
+            'Host': self.Host,
             'Referer': main_url,
-            'User-Agent': self.User_Agent
+            'User-Agent': self.User_Agent,
         }
 
-        # 获取指定板块内容
-        content = self.getPage(djkscx_url, headers=headers2)
+        content = self.getPage(xscjcx_url, headers=headers2)
         soup3 = content[1]
 
-        self.printData(soup3)
+        __EVENTTARGET = soup3.find('input', attrs={'name': '__EVENTTARGET'}).attrs['value']
+        __EVENTARGUMENT = soup3.find('input', attrs={'name': '__EVENTARGUMENT'}).attrs['value']
+        __VIEWSTATE = soup3.find('input', attrs={'name': '__VIEWSTATE'}).attrs['value']
+        hidLanguage = ''
+        # ddlXN = soup3.find('select', id='ddlXN').find_all('')
+        ddlXN = ''
+        # ddlXQ = soup3.find('select', id='ddlXQ').find('option', attrs={'selected': 'selected'}).get_text()
+        ddlXQ = ''
+        # ddl_kcxz = soup3.find('select', id='ddl_kcxz').find('option', attrs={'selected': 'selected'}).attrs['value']
+        ddl_kcxz = ''
+        btn_zcj = soup3.find('input', attrs={'name': 'btn_zcj'}).attrs['value']
+
+        # print __EVENTTARGET
+        # print __EVENTARGUMENT
+        # print __VIEWSTATE
+        # print hidLanguage
+        # print ddlXN
+        # print ddlXQ
+        # print ddl_kcxz
+        # print btn_zcj
+
+        postdata2 = urllib.urlencode({
+            '__EVENTTARGET': __EVENTTARGET,
+            '__EVENTARGUMENT': __EVENTARGUMENT,
+            '__VIEWSTATE': __VIEWSTATE,
+            'hidLanguage': hidLanguage,
+            'ddlXN': ddlXN,
+            'ddlXQ': ddlXQ,
+            'ddl_kcxz': ddl_kcxz,
+            'btn_zcj': btn_zcj.encode('gb2312', 'replace'),
+        })
+
+        content = self.getPage(xscjcx_url, postdata2, headers2)
+        soup4 = content[1]
+        row = soup4.find(class_='datelist').find_all('tr')[2]
+        for item in row.find_all('td'):
+            print item
 
     # 爬取指定url的解析完成的网页内容
     def getPage(self, url, postdata=None, headers=None):
@@ -107,21 +146,6 @@ class CQUT():
         checkCode = raw_input("验证码是:")
         return checkCode
 
-    # 打印数据
-    def printData(self, soup):
-
-        table = soup.find(class_='datelist')
-
-        tr = table.find_all('tr')
-
-        for row in tr:
-            count = 0
-            for item in row.find_all('td'):
-                if count == 6:  # 只打印前7项数据
-                    break
-                print item.get_text().center(10),
-                count += 1
-            print '\n'
 
 # 程序主入口
 cqut = CQUT(root_url)
