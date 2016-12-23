@@ -27,10 +27,8 @@ class CQUT():
         checkCode_url = re.sub(r'default2.aspx', self.checkCodeUrl, redirect_url)  # 验证码图片地址
 
         # print '模拟登录教务系统,然后嘿嘿!(比如获取四六级成绩)  →_→ '
-        # userName = raw_input("请输入学号:")
-        # password = raw_input("请输入密码:")
-        userName = '11403080238';
-        password = 'ccc123..';
+        userName = raw_input("请输入学号:")
+        password = raw_input("请输入密码:")
 
         checkCode = self.getCheckCode(checkCode_url)  # 得到验证码数字
 
